@@ -1,73 +1,56 @@
-import {Deck} from '@deck.gl/core';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import mapboxgl from 'mapbox-gl';
-
-// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const AIR_PORTS =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
-
-const INITIAL_VIEW_STATE = {
-  latitude: 51.47,
-  longitude: 0.45,
-  zoom: 4,
-  bearing: 0,
-  pitch: 30
-};
-
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
-
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: MAP_STYLE,
-  // Note: deck.gl will be in charge of interaction and event handling
-  interactive: false,
-  center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
-  zoom: INITIAL_VIEW_STATE.zoom,
-  bearing: INITIAL_VIEW_STATE.bearing,
-  pitch: INITIAL_VIEW_STATE.pitch
-});
-
-export const deck = new Deck({
-  canvas: 'deck-canvas',
-  width: '100%',
-  height: '100%',
-  initialViewState: INITIAL_VIEW_STATE,
-  controller: true,
-  onViewStateChange: ({viewState}) => {
-    map.jumpTo({
-      center: [viewState.longitude, viewState.latitude],
-      zoom: viewState.zoom,
-      bearing: viewState.bearing,
-      pitch: viewState.pitch
+	mapboxgl.accessToken = API KEY HERE';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [-122.486052, 37.830348],
+        zoom: 15
     });
-  },
-  layers: [
-    new GeoJsonLayer({
-      id: 'airports',
-      data: AIR_PORTS,
-      // Styles
-      filled: true,
-      pointRadiusMinPixels: 2,
-      pointRadiusScale: 2000,
-      getRadius: f => 11 - f.properties.scalerank,
-      getFillColor: [200, 0, 80, 180],
-      // Interactive props
-      pickable: true,
-      autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
-    }),
-    new ArcLayer({
-      id: 'arcs',
-      data: AIR_PORTS,
-      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-      // Styles
-      getSourcePosition: f => [-0.4531566, 51.4709959], // London
-      getTargetPosition: f => f.geometry.coordinates,
-      getSourceColor: [0, 128, 200],
-      getTargetColor: [200, 0, 80],
-      getWidth: 1
-    })
-  ]
-});
+
+    map.on('load', function () {
+        map.addSource('route', {
+            'type': 'geojson',
+            'data': {
+                'type': 'Feature',
+                'properties': {},
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [
+                        [-122.48369693756104, 37.83381888486939],
+                        [-122.48348236083984, 37.83317489144141],
+                        [-122.48339653015138, 37.83270036637107],
+                        [-122.48356819152832, 37.832056363179625],
+                        [-122.48404026031496, 37.83114119107971],
+                        [-122.48404026031496, 37.83049717427869],
+                        [-122.48348236083984, 37.829920943955045],
+                        [-122.48356819152832, 37.82954808664175],
+                        [-122.48507022857666, 37.82944639795659],
+                        [-122.48610019683838, 37.82880236636284],
+                        [-122.48695850372314, 37.82931081282506],
+                        [-122.48700141906738, 37.83080223556934],
+                        [-122.48751640319824, 37.83168351665737],
+                        [-122.48803138732912, 37.832158048267786],
+                        [-122.48888969421387, 37.83297152392784],
+                        [-122.48987674713133, 37.83263257682617],
+                        [-122.49043464660643, 37.832937629287755],
+                        [-122.49125003814696, 37.832429207817725],
+                        [-122.49163627624512, 37.832564787218985],
+                        [-122.49223709106445, 37.83337825839438],
+                        [-122.49378204345702, 37.83368330777276]
+                    ]
+                }
+            }
+        });
+        map.addLayer({
+            'id': 'route',
+            'type': 'line',
+            'source': 'route',
+            'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': '#888',
+                'line-width': 8
+            }
+        });
+    });
